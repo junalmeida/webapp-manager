@@ -1,5 +1,0 @@
-#!/bin/bash
-sudo rm -rf /usr/lib/webapp-manager
-sudo rm -rf /usr/share/webapp-manager
-sudo cp -R usr /
-webapp-manager
