@@ -15,31 +15,32 @@ import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
-import threading
 import traceback
-from typing import Optional
+from enum import Enum, auto
+from typing import Any, Callable, Generator, List, Optional, cast
+
 
 #   2. Related third party imports.
-from gi.repository import GObject
-import PIL.Image
+from bs4 import BeautifulSoup
 import requests
+from PIL import Image # type: ignore
 # Note: BeautifulSoup is an optional import supporting another way of getting a website's favicons.
 
 
-# Used as a decorator to run things in the background
-def _async(func):
-    def wrapper(*args, **kwargs):
-        thread = threading.Thread(target=func, args=args, kwargs=kwargs)
-        thread.daemon = True
-        thread.start()
-        return thread
-    return wrapper
+# # Used as a decorator to run things in the background
+# def _async(func):
+#     def wrapper(*args, **kwargs):
+#         thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+#         thread.daemon = True
+#         thread.start()
+#         return thread
+#     return wrapper
 
-# Used as a decorator to run things in the main loop, from another thread
-def idle(func):
-    def wrapper(*args):
-        GObject.idle_add(func, *args)
-    return wrapper
+# # Used as a decorator to run things in the main loop, from another thread
+# def idle(func):
+#     def wrapper(*args):
+#         GObject.idle_add(func, *args)
+#     return wrapper
 
 # i18n
 APP = 'webapp-manager'
@@ -62,11 +63,21 @@ FLOORP_FLATPAK_PROFILES_DIR = os.path.expanduser("~/.var/app/one.ablaze.floorp/d
 EPIPHANY_PROFILES_DIR = os.path.join(ICE_DIR, "epiphany")
 FALKON_PROFILES_DIR = os.path.join(ICE_DIR, "falkon")
 ICONS_DIR = os.path.join(ICE_DIR, "icons")
-BROWSER_TYPE_FIREFOX, BROWSER_TYPE_FIREFOX_FLATPAK, BROWSER_TYPE_FIREFOX_SNAP, BROWSER_TYPE_LIBREWOLF_FLATPAK, BROWSER_TYPE_WATERFOX_FLATPAK, BROWSER_TYPE_FLOORP_FLATPAK, BROWSER_TYPE_CHROMIUM, BROWSER_TYPE_EPIPHANY, BROWSER_TYPE_FALKON = range(9)
+
+class BrowserType(Enum):
+    BROWSER_TYPE_FIREFOX=auto(),
+    BROWSER_TYPE_FIREFOX_FLATPAK=auto(),
+    BROWSER_TYPE_FIREFOX_SNAP=auto(),
+    BROWSER_TYPE_LIBREWOLF_FLATPAK=auto(),
+    BROWSER_TYPE_WATERFOX_FLATPAK=auto(),
+    BROWSER_TYPE_FLOORP_FLATPAK=auto(),
+    BROWSER_TYPE_CHROMIUM=auto(),
+    BROWSER_TYPE_EPIPHANY=auto(),
+    BROWSER_TYPE_FALKON=auto()
 
 class Browser:
 
-    def __init__(self, browser_type, name, exec_path, test_path):
+    def __init__(self, browser_type: BrowserType, name: str, exec_path: str, test_path: str):
         self.browser_type = browser_type
         self.name = name
         self.exec_path = exec_path
@@ -76,7 +87,7 @@ class Browser:
 # the app menu item (path, name, icon..etc.)
 class WebAppLauncher:
 
-    def __init__(self, path, codename):
+    def __init__(self, path: str, codename: str):
         self.path = path
         self.codename = codename
         self.web_browser = None
@@ -155,7 +166,7 @@ class WebAppManager:
                 os.makedirs(directory)
 
     def get_webapps(self):
-        webapps = []
+        webapps: List[WebAppLauncher] = []
         for filename in os.listdir(APPS_DIR):
             if filename.lower().startswith("webapp-") and filename.endswith(".desktop"):
                 path = os.path.join(APPS_DIR, filename)
@@ -174,67 +185,67 @@ class WebAppManager:
     @staticmethod
     def get_supported_browsers():
         # type, name, exec, test
-        return [Browser(BROWSER_TYPE_FIREFOX, "Firefox", "firefox", "/usr/bin/firefox"),
-                Browser(BROWSER_TYPE_FIREFOX, "Firefox Developer Edition", "firefox-developer-edition", "/usr/bin/firefox-developer-edition"),
-                Browser(BROWSER_TYPE_FIREFOX, "Firefox Nightly", "firefox-nightly", "/usr/bin/firefox-nightly"),
-                Browser(BROWSER_TYPE_FIREFOX, "Firefox Extended Support Release", "firefox-esr", "/usr/bin/firefox-esr"),
-                Browser(BROWSER_TYPE_FIREFOX_FLATPAK, "Firefox (Flatpak)", "/var/lib/flatpak/exports/bin/org.mozilla.firefox", "/var/lib/flatpak/exports/bin/org.mozilla.firefox"),
-                Browser(BROWSER_TYPE_FIREFOX_FLATPAK, "Firefox (Flatpak)", ".local/share/flatpak/exports/bin/org.mozilla.firefox", ".local/share/flatpak/exports/bin/org.mozilla.firefox"),
-                Browser(BROWSER_TYPE_FIREFOX_SNAP, "Firefox (Snap)", "/snap/bin/firefox", "/snap/bin/firefox"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Brave", "brave", "/usr/bin/brave"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Brave Browser", "brave-browser", "/usr/bin/brave-browser"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Brave (Bin)", "brave-bin", "/usr/bin/brave-bin"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Chrome", "google-chrome-stable", "/usr/bin/google-chrome-stable"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Chrome (Beta)", "google-chrome-beta", "/usr/bin/google-chrome-beta"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Chrome (Flatpak)", "/var/lib/flatpak/exports/bin/com.google.Chrome", "/var/lib/flatpak/exports/bin/com.google.Chrome"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Chrome (Flatpak)", ".local/share/flatpak/exports/bin/com.google.Chrome", ".local/share/flatpak/exports/bin/com.google.Chrome"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Chromium", "chromium", "/usr/bin/chromium"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Chromium (chromium-browser)", "chromium-browser", "/usr/bin/chromium-browser"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Chromium (Snap)", "chromium", "/snap/bin/chromium"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Chromium (Bin)", "chromium-bin", "/usr/bin/chromium-bin-browser"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Ungoogled Chromium", "ungoogled-chromium", "/usr/bin/ungoogled-chromium"),
-                Browser(BROWSER_TYPE_EPIPHANY, "Epiphany", "epiphany", "/usr/bin/epiphany"),
-                Browser(BROWSER_TYPE_FIREFOX,  "LibreWolf", "librewolf", "/usr/bin/librewolf"),
-                Browser(BROWSER_TYPE_LIBREWOLF_FLATPAK,  "LibreWolf (Flatpak)", "/var/lib/flatpak/exports/bin/io.gitlab.librewolf-community", "/var/lib/flatpak/exports/bin/io.gitlab.librewolf-community"),
-                Browser(BROWSER_TYPE_LIBREWOLF_FLATPAK,  "LibreWolf (Flatpak)", ".local/share/flatpak/exports/bin/io.gitlab.librewolf-community", ".local/share/flatpak/exports/bin/io.gitlab.librewolf-community"),
-                Browser(BROWSER_TYPE_FIREFOX,  "Waterfox", "waterfox", "/usr/bin/waterfox"),
-                Browser(BROWSER_TYPE_FIREFOX,  "Waterfox Current", "waterfox-current", "/usr/bin/waterfox-current"),
-                Browser(BROWSER_TYPE_FIREFOX,  "Waterfox Classic", "waterfox-classic", "/usr/bin/waterfox-classic"),
-                Browser(BROWSER_TYPE_FIREFOX,  "Waterfox 3rd Generation", "waterfox-g3", "/usr/bin/waterfox-g3"),
-                Browser(BROWSER_TYPE_FIREFOX,  "Waterfox 4th Generation", "waterfox-g4", "/usr/bin/waterfox-g4"),
-                Browser(BROWSER_TYPE_FIREFOX,  "Floorp", "floorp", "/usr/bin/floorp"),
-                Browser(BROWSER_TYPE_WATERFOX_FLATPAK, "Waterfox (Flatpak)", "/var/lib/flatpak/exports/bin/net.waterfox.waterfox", "/var/lib/flatpak/exports/bin/net.waterfox.waterfox"),
-                Browser(BROWSER_TYPE_WATERFOX_FLATPAK, "Waterfox (Flatpak)", ".local/share/flatpak/exports/bin/net.waterfox.waterfox", ".local/share/flatpak/exports/bin/net.waterfox.waterfox"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Vivaldi", "vivaldi-stable", "/usr/bin/vivaldi-stable"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Vivaldi Snapshot", "vivaldi-snapshot", "/usr/bin/vivaldi-snapshot"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Vivaldi (Flatpak)", "/var/lib/flatpak/exports/bin/com.vivaldi.Vivaldi", "/var/lib/flatpak/exports/bin/com.vivaldi.Vivaldi"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Vivaldi (Flatpak)", ".local/share/flatpak/exports/bin/com.vivaldi.Vivaldi", ".local/share/flatpak/exports/bin/com.vivaldi.Vivaldi"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Microsoft Edge", "microsoft-edge-stable", "/usr/bin/microsoft-edge-stable"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Microsoft Edge Beta", "microsoft-edge-beta", "/usr/bin/microsoft-edge-beta"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Microsoft Edge Dev", "microsoft-edge-dev", "/usr/bin/microsoft-edge-dev"),
-                Browser(BROWSER_TYPE_CHROMIUM, "FlashPeak Slimjet", "flashpeak-slimjet", "/usr/bin/flashpeak-slimjet"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Ungoogled Chromium (Flatpak)", "/var/lib/flatpak/exports/bin/io.github.ungoogled_software.ungoogled_chromium", "/var/lib/flatpak/exports/bin/io.github.ungoogled_software.ungoogled_chromium"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Ungoogled Chromium (Flatpak)", ".local/share/flatpak/exports/bin/io.github.ungoogled_software.ungoogled_chromium", ".local/share/flatpak/exports/bin/io.github.ungoogled_software.ungoogled_chromium"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Chromium (Flatpak)", "/var/lib/flatpak/exports/bin/org.chromium.Chromium", "/var/lib/flatpak/exports/bin/org.chromium.Chromium"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Chromium (Flatpak)", ".local/share/flatpak/exports/bin/org.chromium.Chromium", ".local/share/flatpak/exports/bin/org.chromium.Chromium"),
-                Browser(BROWSER_TYPE_FALKON, "Falkon", "falkon", "/usr/bin/falkon"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Edge (Flatpak)", "/var/lib/flatpak/exports/bin/com.microsoft.Edge", "/var/lib/flatpak/exports/bin/com.microsoft.Edge"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Edge (Flatpak)", ".local/share/flatpak/exports/bin/com.microsoft.Edge", ".local/share/flatpak/exports/bin/com.microsoft.Edge"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Brave (Flatpak)", "/var/lib/flatpak/exports/bin/com.brave.Browser", "/var/lib/flatpak/exports/bin/com.brave.Browser"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Brave (Flatpak)", ".local/share/flatpak/exports/bin/com.brave.Browser", ".local/share/flatpak/exports/bin/com.brave.Browser"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Yandex", "yandex-browser", "/usr/bin/yandex-browser"),
-                Browser(BROWSER_TYPE_FALKON, "Falkon (Flatpak)", "/var/lib/flatpak/exports/bin/org.kde.falkon", "/var/lib/flatpak/exports/bin/org.kde.falkon"),
-                Browser(BROWSER_TYPE_FALKON, "Falkon (Flatpak)", ".local/share/flatpak/exports/bin/org.kde.falkon", ".local/share/flatpak/exports/bin/org.kde.falkon"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Naver Whale", "naver-whale-stable", "/usr/bin/naver-whale-stable"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Yandex (Flatpak)", "/var/lib/flatpak/exports/bin/ru.yandex.Browser", "/var/lib/flatpak/exports/bin/ru.yandex.Browser"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Yandex (Flatpak)", ".local/share/flatpak/exports/bin/ru.yandex.Browser", ".local/share/flatpak/exports/bin/ru.yandex.Browser"),
-                Browser(BROWSER_TYPE_CHROMIUM, "Thorium", "thorium-browser", "/usr/bin/thorium-browser"),
-                Browser(BROWSER_TYPE_FIREFOX, "Floorp", "floorp", "/usr/bin/floorp"),
-                Browser(BROWSER_TYPE_FLOORP_FLATPAK, "Floorp (Flatpak)", "/var/lib/flatpak/exports/bin/one.ablaze.floorp", "/var/lib/flatpak/exports/bin/one.ablaze.floorp"),
-                Browser(BROWSER_TYPE_FLOORP_FLATPAK, "Floorp (Flatpak)", ".local/share/flatpak/exports/bin/one.ablaze.floorp", ".local/share/flatpak/exports/bin/one.ablaze.floorp")
+        return [Browser(BrowserType.BROWSER_TYPE_FIREFOX, "Firefox", "firefox", "/usr/bin/firefox"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX, "Firefox Developer Edition", "firefox-developer-edition", "/usr/bin/firefox-developer-edition"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX, "Firefox Nightly", "firefox-nightly", "/usr/bin/firefox-nightly"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX, "Firefox Extended Support Release", "firefox-esr", "/usr/bin/firefox-esr"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX_FLATPAK, "Firefox (Flatpak)", "/var/lib/flatpak/exports/bin/org.mozilla.firefox", "/var/lib/flatpak/exports/bin/org.mozilla.firefox"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX_FLATPAK, "Firefox (Flatpak)", ".local/share/flatpak/exports/bin/org.mozilla.firefox", ".local/share/flatpak/exports/bin/org.mozilla.firefox"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX_SNAP, "Firefox (Snap)", "/snap/bin/firefox", "/snap/bin/firefox"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Brave", "brave", "/usr/bin/brave"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Brave Browser", "brave-browser", "/usr/bin/brave-browser"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Brave (Bin)", "brave-bin", "/usr/bin/brave-bin"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Chrome", "google-chrome-stable", "/usr/bin/google-chrome-stable"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Chrome (Beta)", "google-chrome-beta", "/usr/bin/google-chrome-beta"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Chrome (Flatpak)", "/var/lib/flatpak/exports/bin/com.google.Chrome", "/var/lib/flatpak/exports/bin/com.google.Chrome"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Chrome (Flatpak)", ".local/share/flatpak/exports/bin/com.google.Chrome", ".local/share/flatpak/exports/bin/com.google.Chrome"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Chromium", "chromium", "/usr/bin/chromium"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Chromium (chromium-browser)", "chromium-browser", "/usr/bin/chromium-browser"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Chromium (Snap)", "chromium", "/snap/bin/chromium"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Chromium (Bin)", "chromium-bin", "/usr/bin/chromium-bin-browser"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Ungoogled Chromium", "ungoogled-chromium", "/usr/bin/ungoogled-chromium"),
+                Browser(BrowserType.BROWSER_TYPE_EPIPHANY, "Epiphany", "epiphany", "/usr/bin/epiphany"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX,  "LibreWolf", "librewolf", "/usr/bin/librewolf"),
+                Browser(BrowserType.BROWSER_TYPE_LIBREWOLF_FLATPAK,  "LibreWolf (Flatpak)", "/var/lib/flatpak/exports/bin/io.gitlab.librewolf-community", "/var/lib/flatpak/exports/bin/io.gitlab.librewolf-community"),
+                Browser(BrowserType.BROWSER_TYPE_LIBREWOLF_FLATPAK,  "LibreWolf (Flatpak)", ".local/share/flatpak/exports/bin/io.gitlab.librewolf-community", ".local/share/flatpak/exports/bin/io.gitlab.librewolf-community"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX,  "Waterfox", "waterfox", "/usr/bin/waterfox"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX,  "Waterfox Current", "waterfox-current", "/usr/bin/waterfox-current"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX,  "Waterfox Classic", "waterfox-classic", "/usr/bin/waterfox-classic"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX,  "Waterfox 3rd Generation", "waterfox-g3", "/usr/bin/waterfox-g3"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX,  "Waterfox 4th Generation", "waterfox-g4", "/usr/bin/waterfox-g4"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX,  "Floorp", "floorp", "/usr/bin/floorp"),
+                Browser(BrowserType.BROWSER_TYPE_WATERFOX_FLATPAK, "Waterfox (Flatpak)", "/var/lib/flatpak/exports/bin/net.waterfox.waterfox", "/var/lib/flatpak/exports/bin/net.waterfox.waterfox"),
+                Browser(BrowserType.BROWSER_TYPE_WATERFOX_FLATPAK, "Waterfox (Flatpak)", ".local/share/flatpak/exports/bin/net.waterfox.waterfox", ".local/share/flatpak/exports/bin/net.waterfox.waterfox"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Vivaldi", "vivaldi-stable", "/usr/bin/vivaldi-stable"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Vivaldi Snapshot", "vivaldi-snapshot", "/usr/bin/vivaldi-snapshot"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Vivaldi (Flatpak)", "/var/lib/flatpak/exports/bin/com.vivaldi.Vivaldi", "/var/lib/flatpak/exports/bin/com.vivaldi.Vivaldi"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Vivaldi (Flatpak)", ".local/share/flatpak/exports/bin/com.vivaldi.Vivaldi", ".local/share/flatpak/exports/bin/com.vivaldi.Vivaldi"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Microsoft Edge", "microsoft-edge-stable", "/usr/bin/microsoft-edge-stable"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Microsoft Edge Beta", "microsoft-edge-beta", "/usr/bin/microsoft-edge-beta"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Microsoft Edge Dev", "microsoft-edge-dev", "/usr/bin/microsoft-edge-dev"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "FlashPeak Slimjet", "flashpeak-slimjet", "/usr/bin/flashpeak-slimjet"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Ungoogled Chromium (Flatpak)", "/var/lib/flatpak/exports/bin/io.github.ungoogled_software.ungoogled_chromium", "/var/lib/flatpak/exports/bin/io.github.ungoogled_software.ungoogled_chromium"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Ungoogled Chromium (Flatpak)", ".local/share/flatpak/exports/bin/io.github.ungoogled_software.ungoogled_chromium", ".local/share/flatpak/exports/bin/io.github.ungoogled_software.ungoogled_chromium"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Chromium (Flatpak)", "/var/lib/flatpak/exports/bin/org.chromium.Chromium", "/var/lib/flatpak/exports/bin/org.chromium.Chromium"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Chromium (Flatpak)", ".local/share/flatpak/exports/bin/org.chromium.Chromium", ".local/share/flatpak/exports/bin/org.chromium.Chromium"),
+                Browser(BrowserType.BROWSER_TYPE_FALKON, "Falkon", "falkon", "/usr/bin/falkon"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Edge (Flatpak)", "/var/lib/flatpak/exports/bin/com.microsoft.Edge", "/var/lib/flatpak/exports/bin/com.microsoft.Edge"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Edge (Flatpak)", ".local/share/flatpak/exports/bin/com.microsoft.Edge", ".local/share/flatpak/exports/bin/com.microsoft.Edge"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Brave (Flatpak)", "/var/lib/flatpak/exports/bin/com.brave.Browser", "/var/lib/flatpak/exports/bin/com.brave.Browser"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Brave (Flatpak)", ".local/share/flatpak/exports/bin/com.brave.Browser", ".local/share/flatpak/exports/bin/com.brave.Browser"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Yandex", "yandex-browser", "/usr/bin/yandex-browser"),
+                Browser(BrowserType.BROWSER_TYPE_FALKON, "Falkon (Flatpak)", "/var/lib/flatpak/exports/bin/org.kde.falkon", "/var/lib/flatpak/exports/bin/org.kde.falkon"),
+                Browser(BrowserType.BROWSER_TYPE_FALKON, "Falkon (Flatpak)", ".local/share/flatpak/exports/bin/org.kde.falkon", ".local/share/flatpak/exports/bin/org.kde.falkon"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Naver Whale", "naver-whale-stable", "/usr/bin/naver-whale-stable"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Yandex (Flatpak)", "/var/lib/flatpak/exports/bin/ru.yandex.Browser", "/var/lib/flatpak/exports/bin/ru.yandex.Browser"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Yandex (Flatpak)", ".local/share/flatpak/exports/bin/ru.yandex.Browser", ".local/share/flatpak/exports/bin/ru.yandex.Browser"),
+                Browser(BrowserType.BROWSER_TYPE_CHROMIUM, "Thorium", "thorium-browser", "/usr/bin/thorium-browser"),
+                Browser(BrowserType.BROWSER_TYPE_FIREFOX, "Floorp", "floorp", "/usr/bin/floorp"),
+                Browser(BrowserType.BROWSER_TYPE_FLOORP_FLATPAK, "Floorp (Flatpak)", "/var/lib/flatpak/exports/bin/one.ablaze.floorp", "/var/lib/flatpak/exports/bin/one.ablaze.floorp"),
+                Browser(BrowserType.BROWSER_TYPE_FLOORP_FLATPAK, "Floorp (Flatpak)", ".local/share/flatpak/exports/bin/one.ablaze.floorp", ".local/share/flatpak/exports/bin/one.ablaze.floorp")
                 ]
 
-    def delete_webbapp(self, webapp):
+    def delete_webbapp(self, webapp: WebAppLauncher):
         shutil.rmtree(os.path.join(FIREFOX_PROFILES_DIR, webapp.codename), ignore_errors=True)
         shutil.rmtree(os.path.join(FIREFOX_FLATPAK_PROFILES_DIR, webapp.codename), ignore_errors=True)
         shutil.rmtree(os.path.join(FIREFOX_SNAP_PROFILES_DIR, webapp.codename), ignore_errors=True)
@@ -251,7 +262,7 @@ class WebAppManager:
             os.remove(falkon_orig_prof_dir)
         shutil.rmtree(os.path.join(FALKON_PROFILES_DIR, webapp.codename), ignore_errors=True)
 
-    def create_webapp(self, name, url, icon, category, browser, custom_parameters, isolate_profile=True, navbar=False, privatewindow=False):
+    def create_webapp(self, name: str, url: str, icon: str, category: str, browser: Browser, custom_parameters: str, isolate_profile: bool=True, navbar:bool=False, privatewindow:bool=False):
         # Generate a 4 digit random code (to prevent name collisions, so we can define multiple launchers with the same name)
         random_code =  ''.join(choice(string.digits) for _ in range(4))
         codename = "".join(filter(str.isalpha, name)) + random_code
@@ -282,7 +293,7 @@ class WebAppManager:
             desktop_file.write("X-WebApp-PrivateWindow=%s\n" % bool_to_string(privatewindow))
             desktop_file.write("X-WebApp-Isolated=%s\n" % bool_to_string(isolate_profile))
 
-            if browser.browser_type == BROWSER_TYPE_EPIPHANY:
+            if browser.browser_type == BrowserType.BROWSER_TYPE_EPIPHANY:
                 # Move the desktop file and create a symlink
                 epiphany_profile_path = os.path.join(EPIPHANY_PROFILES_DIR, "org.gnome.Epiphany.WebApp-" + codename)
                 new_path = os.path.join(epiphany_profile_path, "org.gnome.Epiphany.WebApp-%s.desktop" % codename)
@@ -295,9 +306,10 @@ class WebAppManager:
                 # required for app mode. create an empty file .app
                 app_mode_file=os.path.join(epiphany_profile_path, ".app")
                 with open(app_mode_file, 'w') as fp:
+                    fp.write("")
                     pass
 
-            if browser.browser_type == BROWSER_TYPE_FALKON:
+            if browser.browser_type == BrowserType.BROWSER_TYPE_FALKON:
                 falkon_profile_path = os.path.join(FALKON_PROFILES_DIR, codename)
                 os.makedirs(falkon_profile_path)
                 # Create symlink of profile dir at ~/.config/falkon/profiles
@@ -305,12 +317,12 @@ class WebAppManager:
                 os.symlink(falkon_profile_path, falkon_orig_prof_dir)
 
 
-    def get_exec_string(self, browser, codename, custom_parameters, icon, isolate_profile, navbar, privatewindow, url):
-        if browser.browser_type in [BROWSER_TYPE_FIREFOX, BROWSER_TYPE_FIREFOX_FLATPAK, BROWSER_TYPE_FIREFOX_SNAP]:
+    def get_exec_string(self, browser: Browser, codename: str, custom_parameters: str, icon: str, isolate_profile: bool, navbar: bool, privatewindow: bool, url: str):
+        if browser.browser_type in [BrowserType.BROWSER_TYPE_FIREFOX, BrowserType.BROWSER_TYPE_FIREFOX_FLATPAK, BrowserType.BROWSER_TYPE_FIREFOX_SNAP]:
             # Firefox based
-            if browser.browser_type == BROWSER_TYPE_FIREFOX:
+            if browser.browser_type == BrowserType.BROWSER_TYPE_FIREFOX:
                 firefox_profiles_dir = FIREFOX_PROFILES_DIR
-            elif browser.browser_type == BROWSER_TYPE_FIREFOX_FLATPAK:
+            elif browser.browser_type == BrowserType.BROWSER_TYPE_FIREFOX_FLATPAK:
                 firefox_profiles_dir = FIREFOX_FLATPAK_PROFILES_DIR
             else:
                 firefox_profiles_dir = FIREFOX_SNAP_PROFILES_DIR
@@ -330,7 +342,7 @@ class WebAppManager:
             if navbar:
                 shutil.copy('/usr/share/webapp-manager/firefox/userChrome-with-navbar.css',
                             os.path.join(firefox_profile_path, "chrome", "userChrome.css"))
-        elif browser.browser_type == BROWSER_TYPE_LIBREWOLF_FLATPAK:
+        elif browser.browser_type == BrowserType.BROWSER_TYPE_LIBREWOLF_FLATPAK:
             # LibreWolf flatpak
             firefox_profiles_dir = LIBREWOLF_FLATPAK_PROFILES_DIR
             firefox_profile_path = os.path.join(firefox_profiles_dir, codename)
@@ -349,7 +361,7 @@ class WebAppManager:
             if navbar:
                 shutil.copy('/usr/share/webapp-manager/firefox/userChrome-with-navbar.css',
                             os.path.join(firefox_profile_path, "chrome", "userChrome.css"))
-        elif browser.browser_type == BROWSER_TYPE_FLOORP_FLATPAK:
+        elif browser.browser_type == BrowserType.BROWSER_TYPE_FLOORP_FLATPAK:
             # Floorp flatpak
             firefox_profiles_dir = FLOORP_FLATPAK_PROFILES_DIR
             firefox_profile_path = os.path.join(firefox_profiles_dir, codename)
@@ -368,7 +380,7 @@ class WebAppManager:
             if navbar:
                 shutil.copy('/usr/share/webapp-manager/firefox/userChrome-with-navbar.css',
                             os.path.join(firefox_profile_path, "chrome", "userChrome.css"))
-        elif browser.browser_type == BROWSER_TYPE_EPIPHANY:
+        elif browser.browser_type == BrowserType.BROWSER_TYPE_EPIPHANY:
             # Epiphany based
             epiphany_profile_path = os.path.join(EPIPHANY_PROFILES_DIR, "org.gnome.Epiphany.WebApp-" + codename)
             # Create symlink of profile dir at ~/.local/share
@@ -381,7 +393,7 @@ class WebAppManager:
             exec_string += " \"" + url + "\""
             if custom_parameters:
                 exec_string += " {}".format(custom_parameters)
-        elif browser.browser_type == BROWSER_TYPE_FALKON:
+        elif browser.browser_type == BrowserType.BROWSER_TYPE_FALKON:
             # KDE Falkon
             exec_string = browser.exec_path
             exec_string += " --wmclass=WebApp-" + codename
@@ -422,9 +434,9 @@ class WebAppManager:
 
         return exec_string
 
-    def edit_webapp(self, path, name, browser, url, icon, category, custom_parameters, codename, isolate_profile, navbar, privatewindow):
+    def edit_webapp(self, path: str, name: str, browser: Browser, url: str, icon: str, category: str, custom_parameters: str, codename: str, isolate_profile: bool, navbar: bool, privatewindow: bool):
         config = configparser.RawConfigParser()
-        config.optionxform = str
+        #config.optionxform = str
         config.read(path)
         config.set("Desktop Entry", "Name", name)
         config.set("Desktop Entry", "Icon", icon)
@@ -451,19 +463,19 @@ class WebAppManager:
         with open(path, 'w') as configfile:
             config.write(configfile, space_around_delimiters=False)
 
-def bool_to_string(boolean):
+def bool_to_string(boolean: bool):
     if boolean:
         return "true"
     else:
         return "false"
 
-def normalize_url(url):
+def normalize_url(url: str):
     (scheme, netloc, path, _, _, _) = urllib.parse.urlparse(url, "http")
     if not netloc and path:
         return urllib.parse.urlunparse((scheme, path, "", "", "", ""))
     return urllib.parse.urlunparse((scheme, netloc, path, "", "", ""))
 
-def download_image(root_url: str, link: str) -> Optional[PIL.Image.Image]:
+def download_image(root_url: str, link: str) -> Optional[Image.Image]:
     if "://" not in link:
         if link.startswith("/"):
             link = root_url + link
@@ -471,45 +483,45 @@ def download_image(root_url: str, link: str) -> Optional[PIL.Image.Image]:
             link = root_url + "/" + link
     try:
         response = requests.get(link, timeout=3)
-        image = PIL.Image.open(BytesIO(response.content))
-        if image.height > 256:
-            return image.resize((256, 256), PIL.Image.BICUBIC)
+        image = Image.open(BytesIO(response.content)) # type: ignore
+        if image.height > 256: # type: ignore
+            return image.resize((256, 256), Image.BICUBIC) # type: ignore
         return image
     except Exception as e:
         print(e)
         print(link)
         return None
 
-def _find_link_favicon(soup, iconformat):
+def _find_link_favicon(soup: BeautifulSoup, iconformat: str):
     items = soup.find_all("link", {"rel": iconformat})
     for item in items:
-        link = item.get("href")
+        link = cast(str, item.get("href"))
         if link:
             yield link
 
-def _find_meta_content(soup, iconformat):
+def _find_meta_content(soup: BeautifulSoup, iconformat: str):
     item = soup.find("meta", {"name": iconformat})
     if not item:
         return
-    link = item.get("content")
+    link = cast(str, item.get("content")) # type: ignore
     if link:
         yield link
 
-def _find_property(soup, iconformat):
+def _find_property(soup: BeautifulSoup, iconformat: str):
     items = soup.find_all("meta", {"property": iconformat})
     for item in items:
-        link = item.get("content")
+        link = cast(str, item.get("content"))
         if link:
             yield link
 
-def _find_url(_soup, iconformat):
+def _find_url(_soup: BeautifulSoup, iconformat: str):
     yield iconformat
 
 
-def download_favicon(url):
-    images = []
+def download_favicon(url: str):
+    images : List[object]= []
     url = normalize_url(url)
-    (scheme, netloc, path, _, _, _) = urllib.parse.urlparse(url)
+    (scheme, netloc, _, _, _, _) = urllib.parse.urlparse(url)
     root_url = "%s://%s" % (scheme, netloc)
 
     # try favicon grabber first
@@ -523,8 +535,8 @@ def download_favicon(url):
                 if image is not None:
                     t = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
                     images.append(["Favicon Grabber", image, t.name])
-                    image.save(t.name)
-            images = sorted(images, key = lambda x: x[1].height, reverse=True)
+                    image.save(t.name) # type: ignore
+            images = sorted(images, key = lambda x: x[1].height, reverse=True) # type: ignore
             if images:
                 return images
     except Exception as e:
@@ -536,8 +548,7 @@ def download_favicon(url):
         if response.ok:
             import bs4
             soup = bs4.BeautifulSoup(response.content, "html.parser")
-
-            iconformats = [
+            iconformats: List[tuple[str, Callable[[BeautifulSoup, str], Generator[str, Any, None]]]] = [
                 ("apple-touch-icon", _find_link_favicon),
                 ("shortcut icon", _find_link_favicon),
                 ("icon", _find_link_favicon),
@@ -556,12 +567,12 @@ def download_favicon(url):
                     if image is not None:
                         t = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
                         images.append([iconformat, image, t.name])
-                        image.save(t.name)
+                        image.save(t.name) # type: ignore
 
     except Exception as e:
         print(e)
 
-    images = sorted(images, key = lambda x: x[1].height, reverse=True)
+    images = sorted(images, key = lambda x: x[1].height, reverse=True) # type: ignore
     return images
 
 if __name__ == "__main__":
