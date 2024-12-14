@@ -1,0 +1,32 @@
+{
+    "id": "io.github.junalmeida.webapp-manager",
+    "runtime": "org.kde.Platform",
+    "runtime-version": "6.8",
+    "sdk": "org.kde.Sdk",
+    "base": "io.qt.PySide.BaseApp",
+    "base-version": "6.8",
+    "command": "webapp-manager",
+    "finish-args": [
+        "--share=ipc",
+        "--socket=fallback-x11",
+        "--socket=wayland",
+        "--share=network",
+        "--filesystem=xdg-documents"
+    ],
+    "modules": [
+        {
+            "name": "webapp-manager",
+            "buildsystem": "simple",
+            "build-commands": [],
+            "sources": [
+                {
+                    "type": "archive",
+                    "path": "dist/io_github_junalmeida_webapp-manager.tar.gz"
+                }
+            ]
+        }
+    ],
+    "cleanup-commands": [
+        "/app/cleanup-BaseApp.sh"
+    ]
+}

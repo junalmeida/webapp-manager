@@ -1,38 +1,21 @@
-#!/usr/bin/python3
 
-import sys, os
+import os
 from typing import cast
-from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import QApplication, QWidget, QToolBar, QListWidget, QListWidgetItem, QStackedWidget, QMessageBox
-from PySide6.QtCore import QFile, QIODeviceBase, Qt
-from PySide6.QtGui import QAction, QIcon, QPixmap
-from PySide6 import QtAsyncio 
-from setproctitle import setproctitle 
-from icons import *
-from common import REFERENCE_DPI, SUPPORTED_BROWSERS, WebAppLauncher, WebAppManager, APP
-from webAppEdit import WebAppEdit
+from PySide6.QtWidgets import QWidget, QToolBar, QListWidget, QListWidgetItem, QStackedWidget, QMessageBox
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QAction, QIcon, QPixmap, QGuiApplication
+from webapps_manager.icons import *
+from webapps_manager.common import REFERENCE_DPI, SUPPORTED_BROWSERS, WebAppLauncher, APP
+from webapps_manager.WebAppEdit import WebAppEdit
+from webapps_manager.WebAppManager import WebAppManager
+
 class WebAppManagerWindow:
     __window: QWidget
 
-    def __init__(self, application: QApplication):
-        self.manager = WebAppManager()
-
-        dir_name = os.path.dirname(os.path.abspath(__file__))
-        ui_file_name =os.path.join(dir_name, "webapp-manager.ui")
-        ui_file = QFile(ui_file_name)  
-
-        try:
-            if not ui_file.open(QIODeviceBase.OpenModeFlag.ReadOnly):
-                print(f"Cannot open {ui_file_name}: {ui_file.errorString()}")
-                sys.exit(-1)
-            loader = QUiLoader()
-            self.__window = loader.load(ui_file)
-        finally:
-            ui_file.close()
-
-        if not self.__window:
-            print(loader.errorString())
-            sys.exit(-1)
+    def __init__(self, application: QGuiApplication, window: QWidget, manager: WebAppManager):
+        self.__manager = WebAppManager()
+        self.__window = window
+    
 
         self.__window.setWindowTitle(application.applicationName()) 
 
@@ -59,7 +42,7 @@ class WebAppManagerWindow:
         self.__stackedWidget = cast(QStackedWidget, self.__window.findChild(QStackedWidget, "stackedWidget"))
         self.__stackedWidget.currentChanged.connect(self.on_stackedWidget_currentChanged)
 
-        self.__webAppEdit = WebAppEdit(self.__window, cast(QWidget, self.__window.findChild(QWidget, "editPage")), self.manager, self.goFirstPage)
+        self.__webAppEdit = WebAppEdit(self.__window, cast(QWidget, self.__window.findChild(QWidget, "editPage")), self.__manager, self.goFirstPage)
 
         self.__listWidget = cast(QListWidget, self.__window.findChild(QListWidget, "listWidget"))
         self.__listWidget.itemSelectionChanged.connect(self.on_itemSelectionChanged)
@@ -137,7 +120,7 @@ class WebAppManagerWindow:
         self.__actionRemove.setEnabled(False)
         self.__actionEdit.setEnabled(False)
         self.__actionLaunch.setEnabled(False)
-        webapps = self.manager.get_webapps()
+        webapps = self.__manager.get_webapps()
         for webapp in webapps:
             if webapp.is_valid:
                 if webapp.icon is not None and os.path.sep in webapp.icon and os.path.exists(webapp.icon):
@@ -158,15 +141,3 @@ class WebAppManagerWindow:
         if self.__listWidget.count() > 0:
             self.__listWidget.setCurrentItem(self.__listWidget.item(0))
 
-setproctitle(APP)
-if __name__ == "__main__":
-    QApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts, True)
-    app = QApplication(sys.argv)
-    app.setApplicationName("Web Apps")
-    app.setDesktopFileName("webapp-manager.desktop")
-    app.quitOnLastWindowClosed()
-    
-    mainWindow = WebAppManagerWindow(app)
-    mainWindow.show()
-
-    QtAsyncio.run(handle_sigint=True, quit_qapp=True)

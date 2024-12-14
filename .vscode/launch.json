@@ -8,8 +8,8 @@
             "name": "start app",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/usr/lib/webapp-manager/webapp-manager.py",
-            "console": "internalConsole"
+            "console": "integratedTerminal",
+            "module": "webapps_manager"
         }
     ]
 }

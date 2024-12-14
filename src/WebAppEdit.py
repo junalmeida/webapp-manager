@@ -3,10 +3,11 @@ from typing import Callable, cast
 from PySide6.QtWidgets import QWidget, QLineEdit, QPushButton,QComboBox, QCheckBox, QFormLayout, QApplication, QMessageBox
 from PySide6.QtGui import QAction, QIcon, QPixmap
 from PySide6.QtCore import Qt
-from common import ICONS_DIR, REFERENCE_DPI, SUPPORTED_BROWSERS, WebAppLauncher, WebAppManager, download_favicon, get_url_title, normalize_url, _
-from icons import XDG_APPLICATION_EXECUTABLE, XDG_APPLICATION_INTERNET
-from category import SUPPORTED_CATEGORIES, Category
-from browser import Browser 
+from webapps_manager.common import ICONS_DIR, REFERENCE_DPI, SUPPORTED_BROWSERS, WebAppLauncher, _
+from webapps_manager.WebAppManager import WebAppManager, download_favicon, get_url_title, normalize_url
+from webapps_manager.icons import XDG_APPLICATION_EXECUTABLE, XDG_APPLICATION_INTERNET
+from webapps_manager.category import SUPPORTED_CATEGORIES, Category
+from webapps_manager.browser import Browser 
 import subprocess
 import os
 import asyncio

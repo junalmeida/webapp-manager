@@ -1,4 +1,4 @@
-from common import _
+from webapps_manager.common import _
 class Category:
     def __init__(self, key, icon, description):
         self.key = key
