@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>756</width>
-    <height>538</height>
+    <width>631</width>
+    <height>442</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -48,7 +48,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="listPage">
        <layout class="QGridLayout" name="gridLayout_2" rowstretch="0" columnstretch="0" rowminimumheight="0" columnminimumwidth="0">
