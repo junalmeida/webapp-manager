@@ -43,11 +43,14 @@ class WebAppManagerWindow:
 
         self.__actionRemove = cast(QAction, self.__window.findChild(QAction, "actionRemove"))
         self.__actionRemove.triggered.connect(self.actionRemove_clicked)
+        self.__actionRemove.setEnabled(False)
 
         self.__actionEdit = cast(QAction, self.__window.findChild(QAction, "actionEdit"))
+        self.__actionEdit.setEnabled(False)
         self.__actionEdit.triggered.connect(self.actionEdit_clicked)
 
         self.__actionLaunch = cast(QAction, self.__window.findChild(QAction, "actionLaunch"))
+        self.__actionLaunch.setEnabled(False)
         self.__actionLaunch.triggered.connect(self.actionLaunch_clicked)
 
         self.__actionAbout = cast(QAction, self.__window.findChild(QAction, "actionAbout"))
@@ -65,14 +68,15 @@ class WebAppManagerWindow:
         self.__ICON_X_SCALE_FACTOR = self.__window.logicalDpiX() / REFERENCE_DPI
         self.__ICON_Y_SCALE_FACTOR = self.__window.logicalDpiY() / REFERENCE_DPI
         self.goFirstPage()
-        self.load_webapps()
 
 
     def show(self):
         self.__window.show()
 
     def goFirstPage(self):
+        index = self.__listWidget.currentIndex()
         self.load_webapps()
+        self.__listWidget.setCurrentIndex(index)
         self.__stackedWidget.setCurrentIndex(0)
 
     def actionAdd_clicked(self):
@@ -108,7 +112,11 @@ class WebAppManagerWindow:
 
     def on_itemSelectionChanged(self):
         listItem = self.__listWidget.currentItem()
-
+        if not listItem:
+            self.__actionRemove.setEnabled(False)
+            self.__actionEdit.setEnabled(False)
+            self.__actionLaunch.setEnabled(False)
+            return
         webapp = cast(WebAppLauncher, listItem.data(Qt.ItemDataRole.UserRole))
         browser = next(f for f in SUPPORTED_BROWSERS if f.name == webapp.web_browser)
         if (QIcon.hasThemeIcon(browser.icon)):
