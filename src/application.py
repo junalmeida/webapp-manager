@@ -34,9 +34,7 @@ def loadUi(file_name: str):
     finally:
         ui_file.close()
 
-def main():
-    """Initializes and manages the application execution"""
-    setproctitle(APP)
+def apply_menus():        
     if IS_FLATPAK:
         MENUS_PATH = os.path.join(os.getenv("HOME") or "", ".config", "menus", "applications-merged")
         MENUS_FILE = os.path.join(MENUS_PATH, f"{APP_ID}.menu")
@@ -55,6 +53,10 @@ def main():
         if update:
             os.system("flatpak-spawn --host xdg-desktop-menu forceupdate")
 
+def main():
+    """Initializes and manages the application execution"""
+    setproctitle(APP)
+    apply_menus()
 
     QApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts, True)
     app = QApplication(sys.argv)
