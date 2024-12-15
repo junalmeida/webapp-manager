@@ -12,7 +12,9 @@ jobs:
       options: --privileged
     steps:
     - uses: actions/checkout@v4
-    - bash: |
+    - name: "Set Version"
+      shell: bash
+      run: |
         VERSION=${GITHUB_REF##*/}
         echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
         echo "APP_VERSION=$VERSION" > src/version.py
