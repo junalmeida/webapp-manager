@@ -1,0 +1,12 @@
+<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
+"http://www.freedesktop.org/standards/menu-spec/menu-1.0.dtd">
+<Menu>
+  <Name>Applications</Name>
+  <Menu>
+    <Name>io.github.junalmeida.webapps_manager</Name>
+    <Directory>io.github.junalmeida.webapps_manager.directory</Directory>
+    <Include>
+      <Category>WebApps</Category>
+    </Include>
+  </Menu>
+</Menu>

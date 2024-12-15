@@ -1,20 +1,20 @@
 name: Build
-
 on:
-  push:
-    branches:
-      - master
   pull_request:
-    branches:
-      - master
-  workflow_dispatch:
 
 jobs:
-  build:
-    uses: linuxmint/github-actions/.github/workflows/do-builds.yml@master
-    with:
-      commit_id: master
-      ############################## Comma separated list - like 'linuxmint/xapp, linuxmint/cinnamon-desktop'
-      dependencies:
-      ##############################
+  flatpak:
+    name: "Flatpak"
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:kde-6.7
+      options: --privileged
+    steps:
+    - uses: actions/checkout@v4
 
+    - uses: flatpak/flatpak-github-actions/flatpak-builder@master
+      name: "Build"
+      with:
+        upload-artifact: false
+        bundle: io.github.junalmeida.webapps_manager.flatpak
+        manifest-path: io.github.junalmeida.webapps_manager.json

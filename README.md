@@ -1,7 +1,8 @@
-# Webapp Manager
-![build](https://github.com/linuxmint/webapp-manager/actions/workflows/build.yml/badge.svg)
+# Webapp Manager for KDE Plasma 6
 
-Run websites as if they were apps.
+Run websites as if they were apps using the native browser.
+
+![Screenshot](docs/screenshot.png "Screenshot")
 
 FAQ
 ===

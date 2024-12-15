@@ -1,0 +1,48 @@
+[build-system]
+
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+
+name = "io.github.junalmeida.webapps_manager"
+license = {file = "LICENSE"}
+dynamic = ["version"]
+authors = [{name = "Marcos Junior", email = "junalmeida@gmail.com"}]
+maintainers = [{name = "Marcos Junior", email = "junalmeida@gmail.com"}]
+description = "Web Apps is a simple tool to manage web applications"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Utilities",
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+]
+keywords = ["web", "pwa"]
+urls = {Homepage = "https://github.com/junalmeida/webapps_manager"}
+dependencies = []
+
+
+[project.readme]
+
+file = "README.md"
+content-type = "text/markdown"
+
+[project.scripts]
+webapps_manager = "webapps_manager.application:main"
+
+[tool.setuptools]
+packages = ["webapps_manager"]
+package-dir = {webapps_manager = "src"}
+include-package-data = true
+
+
+[tool.setuptools.data-files]
+
+#"share/" = ["usr/share/*"]
+#"/etc/" = ["etc/*"]
+
+[tool.uv]
+config-settings = { editable_mode = "strict" }
