@@ -17,6 +17,7 @@ from bs4 import BeautifulSoup
 import requests
 import asyncio
 from PIL import Image
+from io import BytesIO
 
 from webapps_manager.browser import Browser, BrowserType
 from webapps_manager.common import ICE_DIR, APPS_DIR, PROFILES_DIR, FIREFOX_PROFILES_DIR, FIREFOX_FLATPAK_PROFILES_DIR, ICONS_DIR, EPIPHANY_PROFILES_DIR, FALKON_PROFILES_DIR, FIREFOX_SNAP_PROFILES_DIR, LIBREWOLF_FLATPAK_PROFILES_DIR, FLOORP_FLATPAK_PROFILES_DIR

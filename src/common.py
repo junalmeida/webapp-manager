@@ -1,5 +1,4 @@
 import gettext
-from io import BytesIO
 import locale
 import os
 

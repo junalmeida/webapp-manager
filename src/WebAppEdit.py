@@ -185,10 +185,13 @@ class WebAppEdit:
 
 
     async def btnIcon_clicked(self):
+        isFlatpak = os.getenv("container") == "flatpak"
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         self.__window.setEnabled(False)
+        command = ["flatpak-spawn", "--host", "kdialog"] if isFlatpak else ["kdialog"]
+        command.extend(['--desktopfile', 'webapp-manager','--icon', 'webapp-manager', '--title', _('Select icon'), '--geticon'])
         #TODO: Ideally this should actually call KIconDialog or use a KIconButton from KF6, but I can't find a way to do that in PySide6
-        result = await asyncio.to_thread(subprocess.run, ['kdialog', '--desktopfile', 'webapp-manager','--icon', 'webapp-manager', '--geticon', '--title', _('Select icon')], stdout=subprocess.PIPE)
+        result = await asyncio.to_thread(subprocess.run, command, stdout=subprocess.PIPE)
         icon_selected = result.stdout.decode('utf-8').removesuffix('\n')
         if icon_selected and icon_selected != "" and QIcon.hasThemeIcon(icon_selected):
             icon = QIcon.fromTheme(icon_selected)

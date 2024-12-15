@@ -34,7 +34,6 @@ def loadUi(file_name: str):
 
 def main():
     """Initializes and manages the application execution"""
-
     setproctitle(APP)
     QApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts, True)
     app = QApplication(sys.argv)
