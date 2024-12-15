@@ -10,6 +10,23 @@
             "request": "launch",
             "console": "integratedTerminal",
             "module": "webapps_manager"
+        },
+        {
+            "name": "attach to flatpak",
+            "type": "debugpy",
+            "request": "attach",
+            "justMyCode": false,
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "preLaunchTask": "debug-flatpak",
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/src",
+                    "remoteRoot": "/app/lib/python3.11/site-packages/webapps_manager"
+                }
+            ]
         }
     ]
 }

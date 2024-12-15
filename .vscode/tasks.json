@@ -1,4 +1,62 @@
 {
 	"version": "2.0.0",
-	"tasks": []
+	"tasks": [
+		{
+			"type": "process",
+			"command": "flatpak-builder",
+			"label": "build-flatpak",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"args": [
+				"--ccache",
+				"--force-clean",
+				"--install-deps-from",
+				"flathub",
+				"--state-dir=.flatpak/flatpak-builder",
+				".flatpak/repo",
+				"./io.github.junalmeida.webapps_manager.json"
+			],
+			"problemMatcher": []
+		},
+		{
+			"type": "process",
+			"command": "flatpak-builder",
+			"label": "debug-flatpak",
+			"isBackground": true,
+			"dependsOn": "build-flatpak",
+			"problemMatcher": [
+				{
+					"base": "$python",
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": "Starting...",
+						"endsPattern": "Waiting for debugger attach"
+					}
+				}
+			],
+			"args": [
+				"--env=XDG_SESSION_TYPE=${env:XDG_SESSION_TYPE}",
+				"--run",
+				"${workspaceFolder}/.flatpak/repo",
+				"io.github.junalmeida.webapps_manager.json",
+				"python",
+				"-c",
+				"from webapps_manager import debug; debug()",
+			]
+		},
+		{
+			"type": "process",
+			"command": "flatpak-builder",
+			"label": "shell-flatpak",
+			"args": [
+				"--env=XDG_SESSION_TYPE=${env:XDG_SESSION_TYPE}",
+				"--run",
+				"${workspaceFolder}/.flatpak/repo",
+				"io.github.junalmeida.webapps_manager.json",
+				"bash",
+			]
+		}
+	]
 }

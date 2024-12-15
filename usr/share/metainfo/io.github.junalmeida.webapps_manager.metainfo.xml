@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component type="desktop">
-  <id>io.github.junalmeida.webapps-manager</id>
+  <id>io.github.junalmeida.webapps_manager</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0+</project_license>
 <name>Web Apps Manager</name>
@@ -49,7 +49,7 @@
     <p xml:lang="x-test">xxInstall web apps as desktop applications, so they appear in their own windows and task bar icon. I can use an isolated environment of the chosen browser.xx</p>
     <p xml:lang="zh-TW">將網頁應用程式安裝為桌面應用程式，使其顯示在自己的窗口和任務欄圖標中。我可以使用所選瀏覽器的隔離環境。</p>
   </description>
-  <url type="homepage">https://github.com/junalmeida/webapps-manager</url>
+  <url type="homepage">https://github.com/junalmeida/webapps_manager</url>
   <releases>
     <release version="0.1" date="2024-12-14">
       <description>

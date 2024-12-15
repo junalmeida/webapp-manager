@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 
-name = "io.github.junalmeida.webapps-manager"
+name = "io.github.junalmeida.webapps_manager"
 license = {file = "LICENSE"}
 dynamic = ["version"]
 authors = [{name = "Marcos Junior", email = "junalmeida@gmail.com"}]
@@ -41,8 +41,8 @@ include-package-data = true
 
 [tool.setuptools.data-files]
 
-"share/" = ["usr/share/*"]
-"/etc/" = ["etc/*"]
+#"share/" = ["usr/share/*"]
+#"/etc/" = ["etc/*"]
 
 [tool.uv]
 config-settings = { editable_mode = "strict" }
