@@ -2,6 +2,8 @@
 
 Run websites as if they were apps using the native browser.
 
+![Screenshot](docs/screenshot.png "Screenshot")
+
 FAQ
 ===
 
