@@ -1,18 +1,19 @@
 
 import os
 from typing import cast
-from PySide6.QtWidgets import QWidget, QToolBar, QListWidget, QListWidgetItem, QStackedWidget, QMessageBox
+from PySide6.QtGui import QAction, QIcon, QPixmap
+from PySide6.QtWidgets import QWidget, QToolBar, QListWidget, QListWidgetItem, QStackedWidget, QMessageBox, QApplication
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QIcon, QPixmap, QGuiApplication
-from webapps_manager.icons import *
-from webapps_manager.common import REFERENCE_DPI, SUPPORTED_BROWSERS, WebAppLauncher, APP
+from webapps_manager.icons import XDG_APPLICATION_EXECUTABLE, XDG_APPLICATION_INTERNET
+from webapps_manager.browser import SUPPORTED_BROWSERS
+from webapps_manager.common import REFERENCE_DPI, WebAppLauncher, APP
 from webapps_manager.WebAppEdit import WebAppEdit
 from webapps_manager.WebAppManager import WebAppManager
 
 class WebAppManagerWindow:
     __window: QWidget
 
-    def __init__(self, application: QGuiApplication, window: QWidget, manager: WebAppManager):
+    def __init__(self, application: QApplication, window: QWidget, manager: WebAppManager):
         self.__manager = WebAppManager()
         self.__window = window
     

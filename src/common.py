@@ -1,34 +1,7 @@
-#!/usr/bin/python3
-
-#   1. Standard library imports.
-import asyncio
-import configparser
 import gettext
 from io import BytesIO
-import json
 import locale
 import os
-from random import choice
-import shutil
-import string
-import sys
-import tempfile
-import threading
-import urllib.error
-import urllib.parse
-import urllib.request
-import traceback
-from enum import Enum, auto
-from typing import Any, Callable, Generator, List, Optional, cast
-from webapps_manager.browser import Browser, BrowserType, SUPPORTED_BROWSERS
-
-#   2. Related third party imports.
-from bs4 import BeautifulSoup
-import requests
-
-from PIL import Image # type: ignore
-# Note: BeautifulSoup is an optional import supporting another way of getting a website's favicons.
-
 
 # i18n
 APP = 'webapp-manager'
