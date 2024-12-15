@@ -10,6 +10,8 @@ from webapps_manager.common import IS_FLATPAK, REFERENCE_DPI, WebAppLauncher, AP
 from webapps_manager.WebAppEdit import WebAppEdit
 from webapps_manager.WebAppManager import WebAppManager
 
+from webapps_manager.version import APP_VERSION
+
 class WebAppManagerWindow:
     __window: QWidget
 
@@ -88,10 +90,15 @@ class WebAppManagerWindow:
 
 
     def actionAbout_clicked(self):
-        QMessageBox.about(self.__window, "About Web Apps", '<p><strong>Web Apps</strong> is a simple tool to manage web applications.</p><p>0.0.0.0</p><a href="https://google.com">License</a> | <a href="https://google.com">Report Bugs</a>')
+        QMessageBox.about(self.__window, "About Web Apps", f"""
+                          <p><strong>Web Apps</strong> is a simple tool to manage web applications.</p>
+                          <p>{APP_VERSION}</p>
+                          <p>
+                            <a href="https://github.com/junalmeida/webapps_manager/">Home</a> |                             
+                            <a href="https://github.com/junalmeida/webapps_manager/blob/master/LICENSE">License</a> | 
+                            <a href="https://github.com/junalmeida/webapps_manager/issues">Report Bugs</a>
+                          </p>""")
         
-
-
 
     def on_stackedWidget_currentChanged(self, index: int):
         if index == 0:
