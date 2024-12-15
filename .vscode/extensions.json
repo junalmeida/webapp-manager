@@ -1,7 +1,6 @@
 {
     "recommendations": [
         "ms-python.vscode-python-envs",
-        "ms-python.python",
-        "bilelmoussaoui.flatpak-vscode"
+        "ms-python.python"
     ]
 }
