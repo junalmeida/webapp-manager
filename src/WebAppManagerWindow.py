@@ -1,4 +1,4 @@
-
+import subprocess
 import os
 from typing import cast
 from PySide6.QtGui import QAction, QIcon, QPixmap
@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QWidget, QToolBar, QListWidget, QListWidgetItem, Q
 from PySide6.QtCore import Qt
 from webapps_manager.icons import XDG_APPLICATION_EXECUTABLE, XDG_APPLICATION_INTERNET
 from webapps_manager.browser import SUPPORTED_BROWSERS
-from webapps_manager.common import REFERENCE_DPI, WebAppLauncher, APP
+from webapps_manager.common import IS_FLATPAK, REFERENCE_DPI, WebAppLauncher, APP
 from webapps_manager.WebAppEdit import WebAppEdit
 from webapps_manager.WebAppManager import WebAppManager
 
@@ -79,7 +79,12 @@ class WebAppManagerWindow:
         self.__stackedWidget.setCurrentIndex(1)
 
     def actionLaunch_clicked(self):
-        print("Launch clicked")
+        listItem = self.__listWidget.currentItem()
+        webapp = cast(WebAppLauncher, listItem.data(Qt.ItemDataRole.UserRole))
+        if webapp.exec:
+            command = "flatpak-spawn --host " if IS_FLATPAK else ""
+            command += webapp.exec
+            subprocess.Popen(command, shell=True)
 
 
     def actionAbout_clicked(self):

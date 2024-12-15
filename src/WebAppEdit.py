@@ -3,7 +3,7 @@ from typing import Callable, cast
 from PySide6.QtWidgets import QWidget, QLineEdit, QPushButton,QComboBox, QCheckBox, QFormLayout, QApplication, QMessageBox
 from PySide6.QtGui import QAction, QIcon, QPixmap
 from PySide6.QtCore import Qt
-from webapps_manager.common import ICONS_DIR, REFERENCE_DPI, WebAppLauncher, APP_ID, _
+from webapps_manager.common import ICONS_DIR, REFERENCE_DPI, WebAppLauncher, APP_ID, _, IS_FLATPAK
 from webapps_manager.WebAppManager import WebAppManager, download_favicon, get_url_title, normalize_url
 from webapps_manager.icons import XDG_APPLICATION_EXECUTABLE, XDG_APPLICATION_INTERNET
 from webapps_manager.category import SUPPORTED_CATEGORIES, Category
@@ -35,6 +35,10 @@ class WebAppEdit:
             self.__lstCategory.addItem(QIcon.fromTheme(cat.icon), cat.description, cat)
 
         self.__lstBrowser = cast(QComboBox, editPage.findChild(QComboBox, "lstBrowser"))
+        if IS_FLATPAK:
+            ICONS_PATH = QIcon.themeSearchPaths() 
+            ICONS_PATH.extend(["/run/host/usr/share/icons"])
+            QIcon.setThemeSearchPaths(ICONS_PATH)
         for browser in SUPPORTED_BROWSERS:
                 if browser.exists:
                     if (QIcon.hasThemeIcon(browser.icon)):
@@ -185,10 +189,9 @@ class WebAppEdit:
 
 
     async def btnIcon_clicked(self):
-        isFlatpak = os.getenv("container") == "flatpak"
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         self.__window.setEnabled(False)
-        command = ["flatpak-spawn", "--host", "kdialog"] if isFlatpak else ["kdialog"]
+        command = ["flatpak-spawn", "--host", "kdialog"] if IS_FLATPAK else ["kdialog"]
         command.extend(['--desktopfile', APP_ID,'--icon', APP_ID, '--title', _('Select icon'), '--geticon'])
         #TODO: Ideally this should actually call KIconDialog or use a KIconButton from KF6, but I can't find a way to do that in PySide6
         result = await asyncio.to_thread(subprocess.run, command, stdout=subprocess.PIPE)

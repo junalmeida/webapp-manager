@@ -2,6 +2,7 @@ import gettext
 import locale
 import os
 
+IS_FLATPAK = os.getenv("container") == "flatpak"
 # i18n
 APP_ID="io.github.junalmeida.webapps_manager"
 APP = 'webapps_manager'

@@ -3,13 +3,13 @@ import os
 import sys
 from setproctitle import setproctitle
 from webapps_manager.WebAppManagerWindow import WebAppManagerWindow
-from webapps_manager.common import APP, APP_ID
+from webapps_manager.common import APP, APP_ID, _
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt, QFile, QIODeviceBase
 from PySide6 import QtAsyncio
 from PySide6.QtUiTools import QUiLoader
 from webapps_manager.WebAppManager import WebAppManager
-from webapps_manager.common import _
+
 
 def loadUi(file_name: str):
     dir_name = os.path.dirname(os.path.abspath(__file__))

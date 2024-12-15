@@ -3,8 +3,8 @@
 <Menu>
   <Name>Applications</Name>
   <Menu>
-    <Name>webapps-webapps</Name>
-    <Directory>webapps-webapps.directory</Directory>
+    <Name>io.github.junalmeida.webapps_manager</Name>
+    <Directory>io.github.junalmeida.webapps_manager.directory</Directory>
     <Include>
       <Category>WebApps</Category>
     </Include>

@@ -13,6 +13,8 @@
         "--device=dri",
         "--share=network",
         "--filesystem=xdg-documents",
+        "--filesystem=host-os",
+        "--filesystem=/var/lib/flatpak",
         "--talk-name=org.freedesktop.Flatpak"
     ],
     "modules": [
