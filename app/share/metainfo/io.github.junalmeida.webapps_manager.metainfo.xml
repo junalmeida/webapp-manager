@@ -28,7 +28,8 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/junalmeida/webapps_manager/docs/screenshot.png</image>
+      <image>
+        https://raw.githubusercontent.com/junalmeida/webapps_manager/refs/heads/master/docs/screenshot.png</image>
       <caption>Web Apps Manager screenshot</caption>
     </screenshot>
   </screenshots>
