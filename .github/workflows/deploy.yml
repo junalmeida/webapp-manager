@@ -18,7 +18,7 @@ jobs:
         VERSION=${GITHUB_REF##*/}
         echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
         echo "APP_VERSION=$VERSION" > src/version.py
-    - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+    - uses: flatpak/flatpak-github-actions/flatpak-builder@master
       name: "Build"
       with:
         upload-artifact: false
