@@ -23,7 +23,7 @@ from webapps_manager.browser import Browser, BrowserType
 from webapps_manager.common import ICE_DIR, APPS_DIR, PROFILES_DIR, FIREFOX_PROFILES_DIR, FIREFOX_FLATPAK_PROFILES_DIR, ICONS_DIR, EPIPHANY_PROFILES_DIR, FALKON_PROFILES_DIR, FIREFOX_SNAP_PROFILES_DIR, LIBREWOLF_FLATPAK_PROFILES_DIR, FLOORP_FLATPAK_PROFILES_DIR
 from webapps_manager.common import WebAppLauncher, _, IS_FLATPAK
 
-FIREFOX_FILES_ROOT = "/usr/share/webapp-manager/firefox" if not IS_FLATPAK else "/app/share/webapp-manager/firefox"
+FIREFOX_FILES_ROOT = "/usr/share/webapps_manager/firefox" if not IS_FLATPAK else "/app/share/webapps_manager/firefox"
 FIREFOX_SKELETON_PROFILE = f"{FIREFOX_FILES_ROOT}/profile"
 FIREFOX_NAVBAR_CSS = f"{FIREFOX_FILES_ROOT}/userChrome-with-navbar.css"
 class WebAppManager:

@@ -12,9 +12,9 @@
         "--socket=wayland",
         "--device=dri",
         "--share=network",
-        "--filesystem=xdg-documents",
         "--filesystem=host-os",
         "--filesystem=/var/lib/flatpak",
+        "--filesystem=home",
         "--talk-name=org.freedesktop.Flatpak"
     ],
     "modules": [
@@ -36,7 +36,8 @@
             "buildsystem": "simple",
             "build-commands": [
                 "python -m pip install --no-build-isolation --prefix=/app .",
-                "cp -R usr/share/* ${FLATPAK_DEST}/share/"
+                "cp -R share/* ${FLATPAK_DEST}/share/",
+                "cp -R etc/* ${FLATPAK_DEST}/etc/"
             ],
             "sources": [
                 {
@@ -46,12 +47,12 @@
                 },
                 {
                     "type": "dir",
-                    "path": "usr",
-                    "dest": "usr"
+                    "path": "app/share",
+                    "dest": "share"
                 },
                 {
                     "type": "dir",
-                    "path": "etc",
+                    "path": "app/etc",
                     "dest": "etc"
                 },
                 {

@@ -11,7 +11,7 @@ license = {file = "LICENSE"}
 dynamic = ["version"]
 authors = [{name = "Marcos Junior", email = "junalmeida@gmail.com"}]
 maintainers = [{name = "Marcos Junior", email = "junalmeida@gmail.com"}]
-description = "Web Apps is a simple tool to manage web applications."
+description = "Web Apps is a simple tool to manage web applications"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
@@ -21,7 +21,7 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
 ]
 keywords = ["web", "pwa"]
-urls = {Homepage = "https://github.com/junalmeida/webapps-manager"}
+urls = {Homepage = "https://github.com/junalmeida/webapps_manager"}
 dependencies = []
 
 
