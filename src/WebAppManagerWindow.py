@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QWidget, QToolBar, QListWidget, QListWidgetItem, Q
 from PySide6.QtCore import Qt
 from webapps_manager.icons import XDG_APPLICATION_EXECUTABLE, XDG_APPLICATION_INTERNET
 from webapps_manager.browser import SUPPORTED_BROWSERS
-from webapps_manager.common import IS_FLATPAK, REFERENCE_DPI, WebAppLauncher, APP
+from webapps_manager.common import IS_FLATPAK, REFERENCE_DPI, WebAppLauncher, _
 from webapps_manager.WebAppEdit import WebAppEdit
 from webapps_manager.WebAppManager import WebAppManager
 
@@ -90,8 +90,8 @@ class WebAppManagerWindow:
 
 
     def actionAbout_clicked(self):
-        QMessageBox.about(self.__window, "About Web Apps", f"""
-                          <p><strong>Web Apps</strong> is a simple tool to manage web applications.</p>
+        QMessageBox.about(self.__window, f"{_("About")} {self.__window.windowTitle()}", f"""
+                          <p><strong>{self.__window.windowTitle()}</strong> is a simple tool to manage web applications.</p>
                           <p>{APP_VERSION}</p>
                           <p>
                             <a href="https://github.com/junalmeida/webapps_manager/">Home</a> |                             

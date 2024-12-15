@@ -1,0 +1,35 @@
+name: Deploy
+on:
+  release:
+    types: [created]
+
+jobs:
+  flatpak:
+    name: "Flatpak"
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:kde-6.7
+      options: --privileged
+    steps:
+    - uses: actions/checkout@v4
+    - bash: |
+        VERSION=${GITHUB_REF##*/}
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+        echo "APP_VERSION=$VERSION" > src/version.py
+    - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+      name: "Build"
+      with:
+        bundle: io.github.junalmeida.webapps_manager.flatpak
+        manifest-path: io.github.junalmeida.webapps_manager.json
+        cache-key: flatpak-builder-${{ github.sha }}
+    - name: Upload to Release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: io.github.junalmeida.webapps_manager.flatpak
+    # - uses: flatpak/flatpak-github-actions/flat-manager@v6
+    #   name: "Deploy"
+    #   with:
+    #     repository: flathub
+    #     flat-manager-url: https://flatpak-api.elementary.io
+    #     token: some_very_hidden_token
