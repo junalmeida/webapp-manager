@@ -21,6 +21,7 @@ jobs:
     - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
       name: "Build"
       with:
+        upload-artifact: false
         bundle: io.github.junalmeida.webapps_manager.flatpak
         manifest-path: io.github.junalmeida.webapps_manager.json
         cache-key: flatpak-builder-${{ github.sha }}
@@ -28,7 +29,8 @@ jobs:
       uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: io.github.junalmeida.webapps_manager.flatpak
+        files: |
+          **/io.github.junalmeida.webapps_manager.flatpak
     # - uses: flatpak/flatpak-github-actions/flat-manager@v6
     #   name: "Deploy"
     #   with:
