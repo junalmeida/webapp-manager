@@ -26,7 +26,7 @@
    <string>MainWindow</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="webapp-manager"/>
+   <iconset theme="io.github.junalmeida.webapps_manager"/>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="sizePolicy">

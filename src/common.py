@@ -3,7 +3,8 @@ import locale
 import os
 
 # i18n
-APP = 'webapp-manager'
+APP_ID="io.github.junalmeida.webapps_manager"
+APP = 'webapps_manager'
 LOCALE_DIR = "/usr/share/locale"
 REFERENCE_DPI = 96
 

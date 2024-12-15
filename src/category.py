@@ -1,4 +1,4 @@
-from webapps_manager.common import _
+from webapps_manager.common import _, APP_ID
 class Category:
     def __init__(self, key, icon, description):
         self.key = key
@@ -6,7 +6,7 @@ class Category:
         self.description = description
 
 SUPPORTED_CATEGORIES = [
-    Category("WebApps", "webapp-manager", _("Web")),
+    Category("WebApps", APP_ID, _("Web")),
     Category("Network", "applications-internet", _("Internet")),
     Category("Utility", "applications-utilities", _("Accessories")),
     Category("Games", "applications-games", _("Games")),

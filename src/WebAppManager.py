@@ -23,6 +23,8 @@ from webapps_manager.browser import Browser, BrowserType
 from webapps_manager.common import ICE_DIR, APPS_DIR, PROFILES_DIR, FIREFOX_PROFILES_DIR, FIREFOX_FLATPAK_PROFILES_DIR, ICONS_DIR, EPIPHANY_PROFILES_DIR, FALKON_PROFILES_DIR, FIREFOX_SNAP_PROFILES_DIR, LIBREWOLF_FLATPAK_PROFILES_DIR, FLOORP_FLATPAK_PROFILES_DIR
 from webapps_manager.common import WebAppLauncher, _
 
+FIREFOX_SKELETON_PROFILE = "share/webapp-manager/firefox/profile"
+FIREFOX_NAVBAR_CSS = "share/webapp-manager/firefox/userChrome-with-navbar.css"
 class WebAppManager:
 
     def __init__(self):
@@ -142,9 +144,9 @@ class WebAppManager:
                 exec_string += " {}".format(custom_parameters)
             exec_string += " \"" + url + "\"" + "'"
             # Create a Firefox profile
-            shutil.copytree('/usr/share/webapp-manager/firefox/profile', firefox_profile_path, dirs_exist_ok = True)
+            shutil.copytree(FIREFOX_SKELETON_PROFILE, firefox_profile_path, dirs_exist_ok = True)
             if navbar:
-                shutil.copy('/usr/share/webapp-manager/firefox/userChrome-with-navbar.css',
+                shutil.copy(FIREFOX_NAVBAR_CSS,
                             os.path.join(firefox_profile_path, "chrome", "userChrome.css"))
         elif browser.browser_type == BrowserType.BROWSER_TYPE_LIBREWOLF_FLATPAK:
             # LibreWolf flatpak
@@ -161,9 +163,9 @@ class WebAppManager:
                 exec_string += " {}".format(custom_parameters)
             exec_string += " \"" + url + "\"" + "'"
             # Create a Firefox profile
-            shutil.copytree('/usr/share/webapp-manager/firefox/profile', firefox_profile_path, dirs_exist_ok = True)
+            shutil.copytree(FIREFOX_SKELETON_PROFILE, firefox_profile_path, dirs_exist_ok = True)
             if navbar:
-                shutil.copy('/usr/share/webapp-manager/firefox/userChrome-with-navbar.css',
+                shutil.copy(FIREFOX_NAVBAR_CSS,
                             os.path.join(firefox_profile_path, "chrome", "userChrome.css"))
         elif browser.browser_type == BrowserType.BROWSER_TYPE_FLOORP_FLATPAK:
             # Floorp flatpak
@@ -180,9 +182,9 @@ class WebAppManager:
                 exec_string += " {}".format(custom_parameters)
             exec_string += " \"" + url + "\"" + "'"
             # Create a Firefox profile
-            shutil.copytree('/usr/share/webapp-manager/firefox/profile', firefox_profile_path, dirs_exist_ok = True)
+            shutil.copytree(FIREFOX_SKELETON_PROFILE, firefox_profile_path, dirs_exist_ok = True)
             if navbar:
-                shutil.copy('/usr/share/webapp-manager/firefox/userChrome-with-navbar.css',
+                shutil.copy(FIREFOX_NAVBAR_CSS,
                             os.path.join(firefox_profile_path, "chrome", "userChrome.css"))
         elif browser.browser_type == BrowserType.BROWSER_TYPE_EPIPHANY:
             # Epiphany based
