@@ -37,7 +37,7 @@ class WebAppEdit:
         self.__lstBrowser = cast(QComboBox, editPage.findChild(QComboBox, "lstBrowser"))
         if IS_FLATPAK:
             ICONS_PATH = QIcon.themeSearchPaths() 
-            ICONS_PATH.extend(["/run/host/usr/share/icons"])
+            ICONS_PATH.extend(["/run/host/usr/share/icons", "/var/lib/flatpak/exports/share/icons"])
             QIcon.setThemeSearchPaths(ICONS_PATH)
         for browser in SUPPORTED_BROWSERS:
                 if browser.exists:
