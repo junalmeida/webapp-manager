@@ -12,13 +12,7 @@
   <categories>
     <category>Network</category>
   </categories>
-  <releases>
-    <release version="0.1" date="2024-12-14">
-      <description>
-        <p>First release</p>
-      </description>
-    </release>
-  </releases>
+  <releases type="external" />
   <provides>
     <binary>webapps_manager</binary>
   </provides>

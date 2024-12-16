@@ -15,9 +15,16 @@ jobs:
     - name: "Set Version"
       shell: bash
       run: |
-        VERSION=${GITHUB_REF##*/}
-        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-        echo "APP_VERSION=$VERSION" > src/version.py
+        APP_VERSION=${GITHUB_REF##*/}
+        APP_VERSION="${APP_VERSION:1}"
+        echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+        echo "APP_VERSION=\"$APP_VERSION\"" > src/version.py
+        file=app/share/metainfo/releases/io.github.junalmeida.webapps_manager.releases.xml
+        content="\t<release version=\"$APP_VERSION\" date=\"$(date +%Y-%m-%d)\"/>" 
+        echo $content
+        C=$(echo $content | sed 's/\//\\\//g')
+        sed "/<\/releases>/ s/.*/${C}\n&/" $file > $file.tmp
+        mv $file.tmp $file
     - uses: flatpak/flatpak-github-actions/flatpak-builder@master
       name: "Build"
       with:
