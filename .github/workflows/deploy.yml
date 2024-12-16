@@ -1,8 +1,8 @@
 name: Deploy
 on:
-  push:
-    tags: 
-      - "v*.*.*"
+  release:
+    types: [published]
+
 permissions:
   contents: read
 jobs:
@@ -44,13 +44,11 @@ jobs:
         name: v${ env.APP_VERSION }
         tag: v${ env.APP_VERSION }
         version: ${ env.APP_VERSION }
-        publish: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Upload to Release
       uses: softprops/action-gh-release@v2
       with:
-        draft: true
         files: |
           **/io.github.junalmeida.webapps_manager.flatpak
     # - uses: flatpak/flatpak-github-actions/flat-manager@v6
