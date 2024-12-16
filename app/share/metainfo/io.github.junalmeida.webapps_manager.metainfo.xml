@@ -2,7 +2,7 @@
 <component type="desktop">
   <id>io.github.junalmeida.webapps_manager</id>
   <icon type="stock">io.github.junalmeida.webapps_manager</icon>
-  <launchable type="desktop-id">io.github.junalmeida.webapps_manager</launchable>
+  <launchable type="desktop-id">io.github.junalmeida.webapps_manager.desktop</launchable>
 
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0+</project_license>
