@@ -90,7 +90,9 @@ class WebAppManagerWindow:
 
 
     def actionAbout_clicked(self):
-        QMessageBox.about(self.__window, f"{_("About")} {self.__window.windowTitle()}", f"""
+        title=_("About")
+
+        QMessageBox.about(self.__window, f"{title} {self.__window.windowTitle()}", f"""
                           <p><strong>{self.__window.windowTitle()}</strong> is a simple tool to manage web applications.</p>
                           <p>{APP_VERSION}</p>
                           <p>
