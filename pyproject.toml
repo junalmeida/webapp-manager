@@ -38,6 +38,8 @@ packages = ["webapps_manager"]
 package-dir = {webapps_manager = "src"}
 include-package-data = true
 
+[tool.setuptools.dynamic]
+version = {attr = "webapps_manager.version.APP_VERSION"}
 
 [tool.setuptools.data-files]
 
