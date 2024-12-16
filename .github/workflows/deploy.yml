@@ -1,17 +1,22 @@
 name: Deploy
 on:
-  release:
-    types: [created]
-
+  push:
+    tags: 
+      - "v*.*.*"
+permissions:
+  contents: read
 jobs:
   flatpak:
+    permissions:
+      # Write permission is required to create a GitHub release
+      contents: write
+      pull-requests: read
     name: "Flatpak"
     runs-on: ubuntu-latest
     container:
       image: bilelmoussaoui/flatpak-github-actions:kde-6.7
       options: --privileged
     steps:
-    - uses: actions/checkout@v4
     - name: "Set Version"
       shell: bash
       run: |
@@ -25,6 +30,7 @@ jobs:
         C=$(echo $content | sed 's/\//\\\//g')
         sed "/<\/releases>/ s/.*/${C}\n&/" $file > $file.tmp
         mv $file.tmp $file
+    - uses: actions/checkout@v4
     - uses: flatpak/flatpak-github-actions/flatpak-builder@master
       name: "Build"
       with:
@@ -32,10 +38,19 @@ jobs:
         bundle: io.github.junalmeida.webapps_manager.flatpak
         manifest-path: io.github.junalmeida.webapps_manager.json
         cache-key: flatpak-builder-${{ github.sha }}
+    - uses: release-drafter/release-drafter@v6
+      with:
+        disable-autolabeler: true
+        name: v${ env.APP_VERSION }
+        tag: v${ env.APP_VERSION }
+        version: ${ env.APP_VERSION }
+        publish: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Upload to Release
       uses: softprops/action-gh-release@v2
-      if: startsWith(github.ref, 'refs/tags/')
       with:
+        draft: true
         files: |
           **/io.github.junalmeida.webapps_manager.flatpak
     # - uses: flatpak/flatpak-github-actions/flat-manager@v6
