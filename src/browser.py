@@ -24,7 +24,7 @@ class Browser:
         self.exec_path = exec_path
         self.test_path = test_path
         self.icon = icon
-        self.exists = os.path.exists(test_path)
+        self.exists = os.path.exists(test_path) or os.path.islink(test_path)
 
 SUPPORTED_BROWSERS = [Browser(BrowserType.BROWSER_TYPE_FIREFOX, "Firefox", "firefox", f"{OS_BIN}/firefox", "firefox"),
                 Browser(BrowserType.BROWSER_TYPE_FIREFOX, "Firefox Developer Edition", "firefox-developer-edition", f"{OS_BIN}/firefox-developer-edition", "firefox-developer-edition"),
